@@ -23,6 +23,7 @@ defmodule RumblWeb do
       import Plug.Conn
       import RumblWeb.Router.Helpers
       import RumblWeb.Gettext
+      import RumblWeb.Auth, only: [authenticate_user: 2]
     end
   end
 
