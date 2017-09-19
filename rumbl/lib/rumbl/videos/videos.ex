@@ -55,6 +55,14 @@ defmodule Rumbl.Videos do
     |> Repo.insert()
   end
 
+  def create_video_for_user(attrs \\ %{}, user) do
+    changeset =
+      user
+      |> Ecto.build_assoc(:videos)
+      |> Video.changeset(attrs)
+      |> Repo.insert()
+  end
+
   @doc """
   Updates a video.
 
