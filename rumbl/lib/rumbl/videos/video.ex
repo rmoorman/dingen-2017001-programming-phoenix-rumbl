@@ -10,14 +10,18 @@ defmodule Rumbl.Videos.Video do
     field :url, :string
     #field :user_id, :id
     belongs_to :user, Rumbl.User
+    belongs_to :category, Rumbl.Category
 
     timestamps()
   end
 
+  @required_fields [:url, :title, :description]
+  @optional_fields [:category_id]
+
   @doc false
   def changeset(%Video{} = video, attrs) do
     video
-    |> cast(attrs, [:url, :title, :description])
-    |> validate_required([:url, :title, :description])
+    |> cast(attrs, @required_fields, @optional_fields)
+    |> validate_required(@required_fields)
   end
 end
