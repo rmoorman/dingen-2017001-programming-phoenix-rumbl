@@ -16,4 +16,15 @@ config :rumbl, Rumbl.Repo,
   password: "postgres",
   database: "rumbl_test",
   hostname: "localhost",
-  pool: Ecto.Adapters.SQL.Sandbox
+  pool: Ecto.Adapters.SQL.Sandbox,
+  ownership_timeout: 60_000,
+  timeout: 60_000,
+  pool_timeout: 60_000
+
+# Decrease number of hashing rounds to speed up tests
+# below is wrong (as of version 4 of comeonin as they "moved the configuration
+# to the separate dependency libraries)
+# config :comeonin,
+#   bcrypt_log_rounds: 4,
+#   pbkdf2_rounds: 1_000
+config :bcrypt_elixir, :log_rounds, 1
