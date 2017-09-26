@@ -20,7 +20,9 @@ const Video = {
     const msgInput = document.getElementById("msg-input")
     const postButton = document.getElementById("msg-submit")
     const vidChannel = socket.channel("videos:" + videoId)
-    // TODO join the vidChannel
+    vidChannel.join()
+      .receive("ok", res => console.log("joined the video channel", res))
+      .receive("error", error => console.log("join failed", reason))
   },
 }
 
