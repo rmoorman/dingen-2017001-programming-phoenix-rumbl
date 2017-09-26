@@ -3,6 +3,7 @@ defmodule Rumbl.Videos.Video do
   import Ecto.Changeset
   alias Rumbl.Videos.Video
 
+  @primary_key {:id, Rumbl.Permalink, autogenerate: true}
 
   schema "videos" do
     field :description, :string
@@ -41,5 +42,12 @@ defmodule Rumbl.Videos.Video do
     str
     |> String.downcase()
     |> String.replace(~r/[^\w-]+/u, "-")
+  end
+end
+
+
+defimpl Phoenix.Param, for: Rumbl.Videos.Video do
+  def to_param(%{slug: slug, id: id}) do
+    "#{id}-#{slug}"
   end
 end
