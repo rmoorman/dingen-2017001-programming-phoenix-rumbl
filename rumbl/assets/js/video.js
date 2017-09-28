@@ -29,13 +29,24 @@ const Video = {
       msgInput.value = ""
     })
 
+    msgContainer.addEventListener("click", e => {
+      e.preventDefault()
+      const seconds =
+        e.target.getAttribute("data-seek")
+        || e.target.parentNode.getAttribute("data-seek")
+
+      if (seconds) {
+        Player.seekTo(seconds)
+      }
+    })
+
     vidChannel.on("new_annotation", res => {
       this.renderAnnotation(msgContainer, res)
     })
 
     vidChannel.join()
-      .receive("ok", ({annotations}) => {
-        annotations.forEach(annotation => this.renderAnnotation(msgContainer, annotation))
+      .receive("ok", res => {
+        this.scheduleMessages(msgContainer, res.annotations)
       })
       .receive("error", error => console.log("join failed", reason))
   },
@@ -44,11 +55,42 @@ const Video = {
     const template = document.createElement("div")
     template.innerHTML = `
     <a href="#" data-seek="${this.esc(at)}">
+      [${this.formatTime(at)}]
       <b>${this.esc(user.username)}</b>: ${this.esc(body)}
     </a>
     `
     msgContainer.appendChild(template)
     msgContainer.scrollTop = msgContainer.scrollHeight
+  },
+
+  scheduleMessages(msgContainer, annotations) {
+    window.setTimeout(() => {
+      const ctime = Player.getCurrentTime()
+      const remaining = this.renderAtTime(annotations, ctime, msgContainer)
+      this.scheduleMessages(msgContainer, remaining)
+    }, 1000)
+  },
+
+  renderAtTime(annotations, seconds, msgContainer) {
+    const {due, remaining} = annotations.reduce(({remaining, due}, ann) => {
+      if (ann.at > seconds) {
+        return {remaining: [...remaining, ann], due}
+      } else {
+        return {remaining, due: [...due, ann]}
+      }
+    }, {remaining: [], due: []})
+
+    due.forEach(ann => {
+      this.renderAnnotation(msgContainer, ann)
+    })
+
+    return remaining
+  },
+
+  formatTime(at) {
+    const date = new Date(null)
+    date.setSeconds(at / 1000)
+    return date.toISOString().substr(14, 5)
   },
 
   esc(str) {
