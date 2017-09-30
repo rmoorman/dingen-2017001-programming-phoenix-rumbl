@@ -41,11 +41,16 @@ const Video = {
     })
 
     vidChannel.on("new_annotation", res => {
+      vidChannel.params.last_seen_id = res.id
       this.renderAnnotation(msgContainer, res)
     })
 
     vidChannel.join()
       .receive("ok", res => {
+        const ids = res.annotations.map(x => x.id)
+        if (ids.length > 0) {
+          vidChannel.params.last_seen_id = Math.max(...ids)
+        }
         this.scheduleMessages(msgContainer, res.annotations)
       })
       .receive("error", error => console.log("join failed", reason))
