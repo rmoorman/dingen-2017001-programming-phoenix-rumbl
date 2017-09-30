@@ -66,4 +66,66 @@ defmodule Rumbl.VideosTest do
       assert %Ecto.Changeset{} = Videos.change_video(video)
     end
   end
+
+  describe "annotations" do
+    alias Rumbl.Videos.Annotation
+
+    @valid_attrs %{at: 42, body: "some body"}
+    @update_attrs %{at: 43, body: "some updated body"}
+    @invalid_attrs %{at: nil, body: nil}
+
+    def annotation_fixture(attrs \\ %{}) do
+      {:ok, annotation} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Videos.create_annotation()
+
+      annotation
+    end
+
+    test "list_annotations/0 returns all annotations" do
+      annotation = annotation_fixture()
+      assert Videos.list_annotations() == [annotation]
+    end
+
+    test "get_annotation!/1 returns the annotation with given id" do
+      annotation = annotation_fixture()
+      assert Videos.get_annotation!(annotation.id) == annotation
+    end
+
+    test "create_annotation/1 with valid data creates a annotation" do
+      assert {:ok, %Annotation{} = annotation} = Videos.create_annotation(@valid_attrs)
+      assert annotation.at == 42
+      assert annotation.body == "some body"
+    end
+
+    test "create_annotation/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Videos.create_annotation(@invalid_attrs)
+    end
+
+    test "update_annotation/2 with valid data updates the annotation" do
+      annotation = annotation_fixture()
+      assert {:ok, annotation} = Videos.update_annotation(annotation, @update_attrs)
+      assert %Annotation{} = annotation
+      assert annotation.at == 43
+      assert annotation.body == "some updated body"
+    end
+
+    test "update_annotation/2 with invalid data returns error changeset" do
+      annotation = annotation_fixture()
+      assert {:error, %Ecto.Changeset{}} = Videos.update_annotation(annotation, @invalid_attrs)
+      assert annotation == Videos.get_annotation!(annotation.id)
+    end
+
+    test "delete_annotation/1 deletes the annotation" do
+      annotation = annotation_fixture()
+      assert {:ok, %Annotation{}} = Videos.delete_annotation(annotation)
+      assert_raise Ecto.NoResultsError, fn -> Videos.get_annotation!(annotation.id) end
+    end
+
+    test "change_annotation/1 returns a annotation changeset" do
+      annotation = annotation_fixture()
+      assert %Ecto.Changeset{} = Videos.change_annotation(annotation)
+    end
+  end
 end
