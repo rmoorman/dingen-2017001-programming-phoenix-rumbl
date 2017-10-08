@@ -5,13 +5,23 @@ defmodule Rumbl.InfoSys do
     defstruct score: 0, text: nil, url: nil, backend: nil
   end
 
+  # the start_link function then proxies the processing
+  # to the actual backend module
+  def start_link(backend, query, query_ref, owner, limit) do
+    backend.start_link(query, query_ref, owner, limit)
+  end
+
   # calling compute with a query will
   # cause spawn_query to be called for each backend
   def compute(query, opts \\ []) do
-    limit = opts[:limit] || 0
+    limit = opts[:limit] || 10
     backends = opts[:backends] || @backends
+
     backends
     |> Enum.map(&spawn_query(&1, query, limit))
+    |> await_results(opts)
+    |> Enum.sort(&(&1.score >= &2.score))
+    |> Enum.take(limit)
   end
 
   # spawn query calls the Rumbl.InfoSys.Supervisor with the
@@ -22,12 +32,26 @@ defmodule Rumbl.InfoSys do
     query_ref = make_ref()
     opts = [backend, query, query_ref, self(), limit]
     {:ok, pid} = Supervisor.start_child(Rumbl.InfoSys.Supervisor, opts)
-    {pid, query_ref}
+    monitor_ref = Process.monitor(pid)
+    {pid, monitor_ref, query_ref}
   end
 
-  # the start_link function then proxies the processing
-  # to the actual backend module
-  def start_link(backend, query, query_ref, owner, limit) do
-    backend.start_link(query, query_ref, owner, limit)
+  defp await_results(children, _opts) do
+    await_result(children, [], :infinity)
+  end
+
+  defp await_result([head|tail], acc, timeout) do
+    {pid, monitor_ref, query_ref} = head
+
+    receive do
+      {:results, ^query_ref, results} ->
+        Process.demonitor(monitor_ref, [:flush])
+        await_result(tail, results ++ acc, timeout)
+      {:DOWN, ^monitor_ref, :process, ^pid, _reason} ->
+        await_result(tail, acc, timeout)
+    end
+  end
+  defp await_result([], acc, _) do
+    acc
   end
 end
