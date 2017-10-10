@@ -1,18 +1,7 @@
 defmodule InfoSys do
-  @moduledoc """
-  Documentation for InfoSys.
-  """
+  use Application
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> InfoSys.hello
-      :world
-
-  """
-  def hello do
-    :world
+  def start(_type, _args) do
+    InfoSys.Supervisor.start_link()
   end
 end
