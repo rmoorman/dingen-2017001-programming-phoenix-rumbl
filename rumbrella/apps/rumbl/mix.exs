@@ -5,6 +5,10 @@ defmodule Rumbl.Mixfile do
     [
       app: :rumbl,
       version: "0.0.1",
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock",
       elixir: "~> 1.4",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
@@ -20,7 +24,7 @@ defmodule Rumbl.Mixfile do
   def application do
     [
       mod: {Rumbl.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :info_sys]
     ]
   end
 
@@ -43,7 +47,7 @@ defmodule Rumbl.Mixfile do
       {:cowboy, "~> 1.0"},
       {:comeonin, "~> 4.0"},
       {:bcrypt_elixir, "~> 1.0"},
-      {:sweet_xml, "~> 0.6"}
+      {:info_sys, in_umbrella: true},
     ]
   end
 

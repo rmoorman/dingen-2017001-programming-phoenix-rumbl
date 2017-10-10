@@ -8,7 +8,6 @@ defmodule Rumbl.Application do
     children = [
       supervisor(Rumbl.Repo, []),
       supervisor(RumblWeb.Endpoint, []),
-      supervisor(Rumbl.InfoSys.Supervisor, []),
     ]
     opts = [strategy: :one_for_one, name: Rumbl.Supervisor]
     Supervisor.start_link(children, opts)
